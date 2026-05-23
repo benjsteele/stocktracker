@@ -1,115 +1,147 @@
-# AEGIS Portfolio — stocktracker
+# AEGIS Portfolio
 
 Self-updating portfolio dashboard + AI chat advisor with daily alerts and a weekly Sunday digest.
 
-## Features
+## How it works
 
-- 📊 **Daily dashboard** — auto-updates each weekday morning, shows HOLD / WATCH / ACTION status per stock
-- 📈 **Price history chart** — populates over time, last 30 days at a glance
-- 💬 **Interactive chat** — ask the AI advisor anything, with live web search
-- ⚠ **Action-needed alerts** — email + optional Slack/Discord when something material happens
-- 📬 **Weekly Sunday digest** — synthesized review of the week's moves, alerts, and what to watch
-- ⚙️ **Config-driven** — add or remove stocks by editing one file
+```
+GitHub Actions (scheduled)
+        │
+        ▼
+scripts/update-analysis.js
+  - Calls Claude API with web search
+  - Produces structured JSON (prices, status, alerts)
+  - Writes data/latest.json + data/history/<date>.json
+  - Commits and pushes back to the repo
+  - Emails you only if action_required = true (needs RESEND_API_KEY)
+        │
+        ▼
+Vercel (auto-redeploys on every push to main)
+  ├── index.html        Public dashboard — reads data/latest.json + history
+  ├── chat.html         AI chat — access code gated, calls /api/chat
+  └── api/chat.js       Serverless function — proxies to Claude API, keeps key server-side
+```
+
+**Data flow:**
+1. GitHub Actions runs `update-analysis.js` Mon-Fri at 9:30am ET
+2. Claude searches the web for current prices and news, returns structured JSON
+3. The JSON is committed to `data/` in the repo and pushed to `main`
+4. Vercel redeploys automatically on that push
+5. The dashboard at `/` reads the fresh JSON and renders the portfolio status
+6. The chat at `/chat.html` is a separate live session — each question goes to Claude with web search in real time
+
+**Nothing is stored server-side.** All data lives in the repo as JSON files. Vercel just serves the static files and runs the chat proxy function.
 
 ## Project structure
 
 ```
 stocktracker/
-├── config.json                          ← ADD/REMOVE STOCKS HERE
+├── config.json                     Edit this to add/remove stocks
 ├── .github/workflows/
-│   ├── daily-update.yml                 Mon–Fri 9:30am ET
-│   └── weekly-digest.yml                Sun 12:00pm ET
+│   ├── daily-update.yml            Mon-Fri 9:30am ET
+│   └── weekly-digest.yml           Sun 12:00pm ET
 ├── scripts/
-│   ├── update-analysis.js               Daily analysis + alert email
-│   └── weekly-digest.js                 Sunday digest email
-├── api/chat.js                          Vercel serverless function (chat proxy)
+│   ├── update-analysis.js          Daily analysis runner
+│   └── weekly-digest.js            Sunday digest runner
+├── api/
+│   └── chat.js                     Vercel serverless chat proxy
 ├── data/
-│   ├── latest.json                      Today's analysis
-│   ├── history/                         Date-archived daily snapshots
-│   ├── history-index.json               List of available dates
-│   └── digests/                         Archived weekly digests
-├── index.html                           Dashboard (homepage)
-├── chat.html                            Interactive AI chat
-├── package.json
+│   ├── latest.json                 Today's analysis (auto-updated)
+│   ├── history/                    Daily snapshots by date
+│   ├── history-index.json          Index of available dates for chart
+│   └── digests/                    Weekly digest archive
+├── index.html                      Dashboard (public)
+├── chat.html                       AI chat (access code gated)
 ├── vercel.json
-└── README.md
+└── package.json
 ```
 
 ## Setup
 
-### 1. Push these files to GitHub
-Upload everything to `github.com/benjsteele/stocktracker`.
+### 1. GitHub repo
+Push everything to `github.com/benjsteele/stocktracker` on the `main` branch.
 
-### 2. Get your API keys
-- **Anthropic**: console.anthropic.com → API Keys → create one
-- **Resend** (email): resend.com → API Keys → create one (free, 100/day)
+**Settings → Actions → General:**
+- Actions permissions: Allow all actions
+- Workflow permissions: Read and write
 
-### 3. Connect to Vercel
-1. Sign up at [vercel.com](https://vercel.com) with your GitHub account (free)
-2. **Add New → Project** → import your `stocktracker` repo
+### 2. Vercel
+1. Sign up at [vercel.com](https://vercel.com) with your GitHub account
+2. Add New → Project → import `stocktracker`
 3. Framework preset: **Other**
-4. Click **Environment Variables** and add:
-   - `ANTHROPIC_API_KEY` = your Anthropic key
-   - `ACCESS_CODE` = any password (typed once when you open the chat page)
-5. **Deploy**
+4. Environment Variables:
+   - `ANTHROPIC_API_KEY` — from [console.anthropic.com](https://console.anthropic.com)
+   - `ACCESS_CODE` — any password you choose (gates the chat page)
+5. Deploy — your site goes live at `https://stocktracker-rose.vercel.app`
 
-Your dashboard goes live at `https://stocktracker-<random>.vercel.app/` — bookmark it.
+Note: use the **production URL** (no random hash). Preview deployment URLs require Vercel login.
 
-### 4. Configure GitHub Actions
-In your repo on GitHub:
+### 3. GitHub Secrets and Variables
+**Settings → Secrets and variables → Actions:**
 
-1. **Settings → Secrets and variables → Actions → New repository secret**:
-   - `ANTHROPIC_API_KEY` (same as Vercel)
-   - `RESEND_API_KEY` (from Resend)
-2. **Settings → Variables → New variable**:
-   - `DASHBOARD_URL` = your Vercel URL (so emails link back)
-3. **Settings → Actions → General** → Workflow permissions: **Read and write**
-4. **Actions → Daily Portfolio Analysis → Run workflow**
-   - Set `force_notify: true` for this first run to verify email
-5. Wait ~30 seconds. Check `b_steele@live.co.uk` (including Junk) for the test email.
+Secrets:
+- `ANTHROPIC_API_KEY` — same key as Vercel
+- `RESEND_API_KEY` — optional, only needed for email alerts (see below)
 
-### 5. Verify weekly digest
-- **Actions → Weekly Digest → Run workflow** (any time, to test)
-- It needs at least 1 daily run in history first
-- You'll get a digest email even if no daily history exists yet — it'll skip gracefully
+Variables:
+- `DASHBOARD_URL` — your production Vercel URL (used in email links)
+
+### 4. Run the first analysis
+Actions → Daily Portfolio Analysis → Run workflow → Run workflow
+
+Takes ~30-60 seconds. The dashboard will show live data on completion.
+
+## Email alerts (optional)
+
+Without Resend, the workflow still runs and updates the dashboard — you just won't receive emails.
+
+To enable emails:
+1. Sign up free at [resend.com](https://resend.com) (100 emails/day free)
+2. Create an API key
+3. Add `RESEND_API_KEY` to GitHub Secrets
+4. Test: re-run the workflow with `force_notify: true`
+
+Emails are sent to the `notifyEmail` address in `config.json` and only trigger when `action_required = true` (i.e. a stock has ACTION status or a high-level alert).
 
 ## Adding or removing stocks
 
-Edit `config.json` — that's it. The daily script, weekly digest, dashboard, and chat all read from it.
+Edit `config.json`:
 
 ```json
 {
   "portfolio": [
     { "ticker": "MSFT", "name": "Microsoft", "color": "#00d4ff" },
-    { "ticker": "TSLA", "name": "Tesla", "color": "#cc0000" }
+    { "ticker": "NVDA", "name": "NVIDIA", "color": "#76b900" }
   ],
-  "notifyEmail": "b_steele@live.co.uk"
+  "notifyEmail": "you@example.com",
+  "holderStyle": "long-term"
 }
 ```
 
-Commit. Vercel auto-redeploys. Next daily run picks up the new portfolio.
+Commit and push to `main`. Vercel redeploys automatically. The next daily run picks up the new portfolio.
 
 ## Schedules
 
-| Workflow | When | What it does |
+| Workflow | Schedule | Behaviour |
 |---|---|---|
-| Daily Analysis | Mon–Fri 13:30 UTC (9:30am ET) | Runs Claude with web search, writes `data/latest.json`, emails only if action needed |
-| Weekly Digest | Sun 16:00 UTC (12:00pm ET) | Synthesizes the week, emails digest regardless |
+| Daily Analysis | Mon-Fri 13:30 UTC (9:30am ET) | Runs Claude, writes JSON, emails only if action needed |
+| Weekly Digest | Sun 16:00 UTC (12:00pm ET) | Synthesizes the week, emails digest unconditionally |
 
 ## Cost
 
 | Service | Cost |
 |---|---|
-| Anthropic API | ~$2–5/month (daily + weekly + chat) |
-| Resend | Free (100 emails/day, you'll use <10/month) |
+| Anthropic API | ~$2-5/month (daily + weekly + chat usage) |
+| Resend | Free (100 emails/day) |
 | Vercel | Free (hobby tier) |
-| GitHub Actions | Free (public repo) |
+| GitHub Actions | Free |
 
 ## Security
 
-- API keys live in Vercel env vars + GitHub Secrets — never in the repo, never in the browser
-- The chat page is gated by `ACCESS_CODE` so random visitors can't run up your bill
-- If you ever leak a key: **rotate immediately** at console.anthropic.com / resend.com
+- API keys are in Vercel env vars and GitHub Secrets — never in the repo or browser
+- The chat page requires `ACCESS_CODE` — random visitors cannot use your API quota
+- The dashboard is public read-only — no keys exposed
+- Rotate any leaked key immediately at console.anthropic.com or resend.com
 
 ## Not financial advice
 
