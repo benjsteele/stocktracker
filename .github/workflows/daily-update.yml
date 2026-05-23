@@ -2,7 +2,7 @@ name: Daily Portfolio Analysis
 
 on:
   schedule:
-    # Runs daily at 13:30 UTC (9:30am ET — 30min after US market open)
+    # Runs Mon-Fri at 13:30 UTC (9:30am ET)
     - cron: '30 13 * * 1-5'
   workflow_dispatch:
     inputs:
