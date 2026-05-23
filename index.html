@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AEGIS — Portfolio Intelligence</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #080c12; --cyan: #00d4ff; --text: #c8d8e8;
+    --dim: #667788; --muted: #334455;
+    --panel: rgba(255,255,255,0.03); --border: rgba(255,255,255,0.08);
+    --warn: #ff9900; --danger: #ff4466; --ok: #76b900;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg);
+    background-image: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
+    font-family: 'Courier New', monospace; color: var(--text);
+    min-height: 100vh; padding: 16px;
+    max-width: 800px; margin-inline: auto;
+  }
+  header {
+    display: flex; align-items: center; gap: 12px;
+    padding-bottom: 14px; border-bottom: 1px solid rgba(0,212,255,0.15);
+    margin-bottom: 18px; flex-wrap: wrap;
+  }
+  .logo {
+    width: 36px; height: 36px; border: 1.5px solid var(--cyan);
+    border-radius: 6px; display: flex; align-items: center; justify-content: center;
+    font-size: 18px; color: var(--cyan); background: rgba(0,212,255,0.08);
+  }
+  h1 { margin: 0; font-size: 16px; letter-spacing: 0.08em; color: #e8f4ff; font-weight: 700; }
+  .sub { font-size: 10px; color: rgba(0,212,255,0.6); letter-spacing: 0.15em; }
+  .status-pill {
+    margin-left: auto; padding: 4px 10px; font-size: 10px;
+    border-radius: 4px; letter-spacing: 0.1em;
+    border: 1px solid var(--cyan); color: var(--cyan); background: rgba(0,212,255,0.05);
+  }
+  .chat-link {
+    font-family: inherit; font-size: 10px; letter-spacing: 0.1em;
+    color: var(--cyan); text-decoration: none;
+    border: 1px solid rgba(0,212,255,0.4);
+    padding: 4px 10px; border-radius: 4px; background: rgba(0,212,255,0.05);
+  }
+  .verdict {
+    padding: 16px; margin-bottom: 16px; border-radius: 6px;
+    border: 1px solid var(--border); background: var(--panel);
+  }
+  .verdict.calm { border-color: rgba(118,185,0,0.3); background: rgba(118,185,0,0.04); }
+  .verdict.action { border-color: rgba(255,68,102,0.4); background: rgba(255,68,102,0.06); }
+  .verdict-label { font-size: 10px; letter-spacing: 0.2em; color: var(--dim); margin-bottom: 6px; }
+  .verdict-text { font-size: 13px; line-height: 1.6; }
+  .alerts { margin-bottom: 16px; display: flex; flex-direction: column; gap: 8px; }
+  .alert {
+    padding: 10px 12px; border-radius: 4px;
+    display: flex; align-items: center; gap: 10px; font-size: 12px;
+  }
+  .alert.high { background: rgba(255,68,102,0.08); border: 1px solid rgba(255,68,102,0.3); }
+  .alert.medium { background: rgba(255,153,0,0.08); border: 1px solid rgba(255,153,0,0.3); }
+  .alert .stock { font-weight: 700; }
+  .alert.high .stock { color: var(--danger); }
+  .alert.medium .stock { color: var(--warn); }
+  .chart-card {
+    padding: 14px 14px 6px; margin-bottom: 16px;
+    border: 1px solid var(--border); border-radius: 6px;
+    background: var(--panel);
+  }
+  .chart-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 10px;
+  }
+  .chart-title {
+    font-size: 10px; letter-spacing: 0.2em; color: var(--cyan);
+  }
+  .chart-info { font-size: 10px; color: var(--dim); }
+  .chart-wrap { position: relative; height: 200px; }
+  .chart-empty { text-align: center; padding: 40px 16px; color: var(--muted); font-size: 11px; letter-spacing: 0.1em; }
+  .stocks { display: grid; gap: 10px; margin-bottom: 16px; }
+  .stock-card {
+    padding: 14px; border: 1px solid var(--border);
+    border-radius: 6px; background: var(--panel);
+  }
+  .stock-header {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 8px;
+  }
+  .stock-ticker { font-weight: 700; letter-spacing: 0.1em; font-size: 14px; }
+  .stock-name { font-size: 11px; color: var(--dim); }
+  .stock-status {
+    margin-left: auto; padding: 3px 8px; font-size: 10px;
+    border-radius: 3px; letter-spacing: 0.1em;
+  }
+  .status-HOLD { background: rgba(118,185,0,0.1); color: var(--ok); border: 1px solid rgba(118,185,0,0.3); }
+  .status-WATCH { background: rgba(255,153,0,0.1); color: var(--warn); border: 1px solid rgba(255,153,0,0.3); }
+  .status-ACTION { background: rgba(255,68,102,0.1); color: var(--danger); border: 1px solid rgba(255,68,102,0.4); }
+  .price { font-size: 11px; color: var(--cyan); margin-bottom: 6px; }
+  .headline { font-size: 12px; color: var(--text); margin-bottom: 6px; font-weight: 600; }
+  .reasoning { font-size: 12px; color: var(--dim); line-height: 1.6; }
+  .longterm {
+    padding: 14px; border: 1px dashed rgba(0,212,255,0.25);
+    border-radius: 6px; background: rgba(0,212,255,0.03);
+    font-size: 12px; line-height: 1.6; margin-bottom: 16px;
+  }
+  .longterm-label { font-size: 10px; letter-spacing: 0.2em; color: var(--cyan); margin-bottom: 6px; }
+  footer { text-align: center; font-size: 10px; color: var(--muted); letter-spacing: 0.1em; padding: 14px 0; }
+  .loading, .error { text-align: center; padding: 60px 20px; color: var(--dim); font-size: 12px; letter-spacing: 0.15em; }
+  .error { color: var(--danger); }
+</style>
+</head>
+<body>
+  <header>
+    <div class="logo">⬡</div>
+    <div>
+      <h1>AEGIS PORTFOLIO</h1>
+      <div class="sub">DAILY INTELLIGENCE BRIEF</div>
+    </div>
+    <div class="status-pill" id="status-pill">LOADING…</div>
+    <a href="chat.html" class="chat-link">CHAT →</a>
+  </header>
+
+  <div id="content">
+    <div class="loading">FETCHING LATEST ANALYSIS…</div>
+  </div>
+
+  <footer>AEGIS · UPDATED DAILY VIA GITHUB ACTIONS · NOT FINANCIAL ADVICE</footer>
+
+<script>
+let CONFIG = null;
+let CHART = null;
+
+async function loadConfig() {
+  const r = await fetch('config.json');
+  CONFIG = await r.json();
+}
+
+async function loadHistory() {
+  try {
+    const idxRes = await fetch('data/history-index.json?t=' + Date.now());
+    if (!idxRes.ok) return [];
+    const dates = await idxRes.json();
+    const recent = dates.slice(-30); // last 30 days
+    const files = await Promise.all(recent.map(async (d) => {
+      try {
+        const r = await fetch(`data/history/${d}.json?t=${Date.now()}`);
+        if (!r.ok) return null;
+        return await r.json();
+      } catch { return null; }
+    }));
+    return files.filter(Boolean);
+  } catch { return []; }
+}
+
+async function load() {
+  await loadConfig();
+  try {
+    const res = await fetch('data/latest.json?t=' + Date.now());
+    if (!res.ok) throw new Error('No analysis available yet');
+    const data = await res.json();
+    const history = await loadHistory();
+    render(data, history);
+  } catch (e) {
+    document.getElementById('content').innerHTML =
+      '<div class="error">⚠ ' + escapeHTML(e.message) + '<br><br>The first analysis will run on the next scheduled time, or trigger it manually from the GitHub Actions tab.</div>';
+    document.getElementById('status-pill').textContent = 'OFFLINE';
+  }
+}
+
+function render(d, history) {
+  const pill = document.getElementById('status-pill');
+  pill.textContent = d.action_required ? 'ACTION NEEDED' : 'ALL CLEAR';
+  pill.style.borderColor = d.action_required ? 'var(--danger)' : 'var(--ok)';
+  pill.style.color = d.action_required ? 'var(--danger)' : 'var(--ok)';
+  pill.style.background = d.action_required ? 'rgba(255,68,102,0.05)' : 'rgba(118,185,0,0.05)';
+
+  let html = '';
+
+  // Market summary
+  html += `<div class="verdict ${d.action_required ? 'action' : 'calm'}">
+    <div class="verdict-label">${d.date} · MARKET SUMMARY</div>
+    <div class="verdict-text">${escapeHTML(d.market_summary)}</div>
+  </div>`;
+
+  // Alerts
+  if (d.alerts && d.alerts.length > 0) {
+    html += '<div class="alerts">';
+    d.alerts.forEach(a => {
+      html += `<div class="alert ${a.level}"><span>▲</span><span class="stock">${a.stock}</span><span>${escapeHTML(a.message)}</span></div>`;
+    });
+    html += '</div>';
+  }
+
+  // Chart
+  html += `<div class="chart-card">
+    <div class="chart-header">
+      <div class="chart-title">PRICE HISTORY · ${history.length} DAYS</div>
+      <div class="chart-info">${history.length < 2 ? 'building history…' : ''}</div>
+    </div>
+    <div class="chart-wrap">
+      ${history.length < 2
+        ? '<div class="chart-empty">CHART POPULATES AS DAILY DATA ACCUMULATES</div>'
+        : '<canvas id="price-chart"></canvas>'}
+    </div>
+  </div>`;
+
+  // Stock cards
+  html += '<div class="stocks">';
+  Object.entries(d.stocks || {}).forEach(([ticker, s]) => {
+    const meta = (CONFIG.portfolio || []).find(p => p.ticker === ticker) || { name: ticker, color: '#00d4ff' };
+    html += `<div class="stock-card">
+      <div class="stock-header">
+        <span class="stock-ticker" style="color:${meta.color}">${ticker}</span>
+        <span class="stock-name">${meta.name}</span>
+        <span class="stock-status status-${s.status}">${s.status}</span>
+      </div>
+      ${s.price_note ? `<div class="price">${escapeHTML(s.price_note)}</div>` : ''}
+      <div class="headline">${escapeHTML(s.headline)}</div>
+      <div class="reasoning">${escapeHTML(s.reasoning)}</div>
+    </div>`;
+  });
+  html += '</div>';
+
+  if (d.long_term_view) {
+    html += `<div class="longterm">
+      <div class="longterm-label">LONG-TERM THESIS</div>
+      ${escapeHTML(d.long_term_view)}
+    </div>`;
+  }
+
+  document.getElementById('content').innerHTML = html;
+
+  if (history.length >= 2) renderChart(history);
+}
+
+function renderChart(history) {
+  const canvas = document.getElementById('price-chart');
+  if (!canvas) return;
+  const labels = history.map(h => h.date.slice(5)); // MM-DD
+  const datasets = CONFIG.portfolio.map(stock => ({
+    label: stock.ticker,
+    data: history.map(h => h.stocks?.[stock.ticker]?.price ?? null),
+    borderColor: stock.color,
+    backgroundColor: stock.color + '20',
+    tension: 0.3,
+    borderWidth: 2,
+    pointRadius: 2,
+    pointHoverRadius: 4,
+    spanGaps: true,
+  }));
+
+  if (CHART) CHART.destroy();
+  CHART = new Chart(canvas, {
+    type: 'line',
+    data: { labels, datasets },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: {
+          labels: { color: '#c8d8e8', font: { family: 'monospace', size: 10 }, boxWidth: 12 },
+        },
+        tooltip: {
+          backgroundColor: '#0a1018',
+          borderColor: '#00d4ff44',
+          borderWidth: 1,
+          titleColor: '#e8f4ff',
+          bodyColor: '#c8d8e8',
+          callbacks: { label: c => `${c.dataset.label}: $${c.parsed.y?.toFixed(2)}` },
+        },
+      },
+      scales: {
+        x: { ticks: { color: '#667788', font: { family: 'monospace', size: 9 } }, grid: { color: '#ffffff08' } },
+        y: { ticks: { color: '#667788', font: { family: 'monospace', size: 9 }, callback: v => '$' + v }, grid: { color: '#ffffff08' } },
+      },
+    },
+  });
+}
+
+function escapeHTML(s) {
+  return String(s || '').replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+}
+
+load();
+</script>
+</body>
+</html>

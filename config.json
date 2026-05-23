@@ -1,0 +1,10 @@
+{
+  "portfolio": [
+    { "ticker": "MSFT", "name": "Microsoft", "color": "#00d4ff" },
+    { "ticker": "AMZN", "name": "Amazon (AWS)", "color": "#ff9900" },
+    { "ticker": "NVDA", "name": "NVIDIA", "color": "#76b900" },
+    { "ticker": "GOOGL", "name": "Alphabet", "color": "#ea4335" }
+  ],
+  "notifyEmail": "b_steele@live.co.uk",
+  "holderStyle": "long-term"
+}

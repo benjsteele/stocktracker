@@ -1,0 +1,14 @@
+{
+  "date": "2026-05-23",
+  "market_summary": "Awaiting first scheduled analysis. The next run will populate this page automatically.",
+  "action_required": false,
+  "stocks": {
+    "MSFT": { "status": "HOLD", "price_note": "—", "headline": "Awaiting first analysis", "reasoning": "This card will be populated on the next daily run." },
+    "AMZN": { "status": "HOLD", "price_note": "—", "headline": "Awaiting first analysis", "reasoning": "This card will be populated on the next daily run." },
+    "NVDA": { "status": "HOLD", "price_note": "—", "headline": "Awaiting first analysis", "reasoning": "This card will be populated on the next daily run." },
+    "GOOGL": { "status": "HOLD", "price_note": "—", "headline": "Awaiting first analysis", "reasoning": "This card will be populated on the next daily run." }
+  },
+  "alerts": [],
+  "long_term_view": "Once the daily GitHub Action runs, this dashboard will reflect a current long-term thesis review.",
+  "generated_at": "2026-05-23T00:00:00Z"
+}

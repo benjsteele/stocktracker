@@ -1,0 +1,38 @@
+name: Weekly Digest
+
+on:
+  schedule:
+    # Sundays at 16:00 UTC (12:00pm ET — Sunday lunchtime)
+    - cron: '0 16 * * 0'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  digest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Generate weekly digest
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          RESEND_FROM: ${{ secrets.RESEND_FROM }}
+          DASHBOARD_URL: ${{ vars.DASHBOARD_URL }}
+        run: node scripts/weekly-digest.js
+
+      - name: Commit digest archive
+        run: |
+          git config user.name "AEGIS Bot"
+          git config user.email "actions@github.com"
+          git add data/digests/
+          git diff --staged --quiet || git commit -m "Weekly digest: $(date -u +%Y-%m-%d)"
+          git push

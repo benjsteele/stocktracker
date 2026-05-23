@@ -1,0 +1,49 @@
+name: Daily Portfolio Analysis
+
+on:
+  schedule:
+    # Runs daily at 13:30 UTC (9:30am ET — 30min after US market open)
+    - cron: '30 13 * * 1-5'
+  workflow_dispatch:
+    inputs:
+      force_notify:
+        description: 'Send test notification regardless of action_required'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'false'
+          - 'true'
+
+permissions:
+  contents: write
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run analysis
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          RESEND_FROM: ${{ secrets.RESEND_FROM }}
+          WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
+          DASHBOARD_URL: ${{ vars.DASHBOARD_URL }}
+          FORCE_NOTIFY: ${{ github.event.inputs.force_notify }}
+        run: node scripts/update-analysis.js
+
+      - name: Commit updated analysis
+        run: |
+          git config user.name "AEGIS Bot"
+          git config user.email "actions@github.com"
+          git add data/latest.json data/history/
+          git diff --staged --quiet || git commit -m "Daily analysis: $(date -u +%Y-%m-%d)"
+          git push

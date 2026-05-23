@@ -1,0 +1,9 @@
+{
+  "name": "aegis-portfolio",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "analyze": "node scripts/update-analysis.js"
+  }
+}

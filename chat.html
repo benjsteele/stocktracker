@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AEGIS — Chat</title>
+<style>
+  :root {
+    --bg: #080c12;
+    --cyan: #00d4ff;
+    --text: #c8d8e8;
+    --dim: #667788;
+    --muted: #334455;
+    --panel: rgba(255,255,255,0.04);
+    --border: rgba(255,255,255,0.08);
+    --warn: #ff9900;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    background-image: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
+    font-family: 'Courier New', monospace;
+    color: var(--text);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  header {
+    padding: 14px 20px;
+    border-bottom: 1px solid rgba(0,212,255,0.15);
+    background: rgba(0,212,255,0.03);
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px;
+  }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .logo {
+    width: 32px; height: 32px;
+    border: 1.5px solid var(--cyan);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; color: var(--cyan);
+    background: rgba(0,212,255,0.08);
+  }
+  h1 { margin: 0; font-size: 14px; font-weight: 700; color: #e8f4ff; letter-spacing: 0.08em; }
+  .sub { font-size: 10px; color: rgba(0,212,255,0.55); letter-spacing: 0.15em; }
+  .dash-link {
+    font-family: inherit; font-size: 10px; letter-spacing: 0.1em;
+    color: var(--cyan); text-decoration: none;
+    border: 1px solid rgba(0,212,255,0.4);
+    padding: 6px 10px; border-radius: 4px;
+    background: rgba(0,212,255,0.05);
+  }
+  .stock-chips {
+    padding: 10px 20px; display: flex; gap: 8px; flex-wrap: wrap;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .chip {
+    flex: 1 1 calc(25% - 8px); min-width: 70px;
+    padding: 8px 10px;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 6px; cursor: pointer; transition: all 0.2s;
+    text-align: center;
+  }
+  .chip:hover { background: rgba(255,255,255,0.04); }
+  .chip-ticker { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; }
+  .chip-name { font-size: 10px; color: var(--dim); margin-top: 2px; }
+  .ticker-MSFT { color: #00d4ff; }
+  .ticker-AMZN { color: #ff9900; }
+  .ticker-NVDA { color: #76b900; }
+  .ticker-GOOGL { color: #ea4335; }
+  #chat {
+    flex: 1; overflow-y: auto; padding: 14px 20px;
+    display: flex; flex-direction: column;
+  }
+  .msg { display: flex; margin-bottom: 14px; animation: fadeIn 0.3s ease; }
+  .msg-user { justify-content: flex-end; }
+  .avatar {
+    width: 28px; height: 28px; border-radius: 4px;
+    background: rgba(0,212,255,0.1); border: 1px solid rgba(0,212,255,0.4);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--cyan); font-size: 12px; margin-right: 10px;
+    flex-shrink: 0; margin-top: 2px;
+  }
+  .bubble {
+    max-width: 82%; padding: 10px 14px;
+    font-size: 13px; line-height: 1.6;
+    border-radius: 4px 12px 12px 12px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: #c8d8e8;
+    white-space: pre-wrap; word-break: break-word;
+  }
+  .msg-user .bubble {
+    background: rgba(0,212,255,0.12);
+    border-color: rgba(0,212,255,0.3);
+    border-radius: 12px 4px 12px 12px;
+    color: #a8f0ff;
+  }
+  .bubble strong { color: var(--cyan); font-weight: 600; }
+  .empty {
+    text-align: center; padding: 30px 16px;
+    color: #445566; font-size: 12px; letter-spacing: 0.12em;
+  }
+  .empty .logo-big { font-size: 24px; color: rgba(0,212,255,0.4); margin-bottom: 8px; }
+  .loading-row { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+  .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--cyan); animation: pulse 1s infinite; }
+  .dot:nth-child(2) { animation-delay: 0.2s; }
+  .dot:nth-child(3) { animation-delay: 0.4s; }
+  .loading-text { font-size: 11px; color: var(--dim); letter-spacing: 0.1em; margin-left: 4px; }
+  .prompts {
+    padding: 8px 20px; display: flex; gap: 6px; flex-wrap: wrap;
+    border-top: 1px solid rgba(255,255,255,0.04);
+  }
+  .prompt-btn {
+    padding: 5px 10px; font-size: 10px; font-family: inherit;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: var(--dim); border-radius: 4px;
+    cursor: pointer; letter-spacing: 0.08em;
+    transition: all 0.15s;
+  }
+  .prompt-btn:hover { color: var(--cyan); border-color: rgba(0,212,255,0.35); }
+  .prompt-btn:disabled { color: var(--muted); cursor: not-allowed; }
+  .input-bar {
+    padding: 12px 20px; display: flex; gap: 10px; align-items: flex-end;
+    border-top: 1px solid rgba(0,212,255,0.12);
+    background: rgba(0,212,255,0.02);
+  }
+  #input {
+    flex: 1; padding: 10px 12px;
+    background: rgba(0,0,0,0.3);
+    border: 1px solid rgba(0,212,255,0.2);
+    color: var(--text); font-size: 13px; font-family: inherit;
+    border-radius: 6px; resize: none; outline: none;
+    line-height: 1.5;
+  }
+  #input:focus { border-color: rgba(0,212,255,0.5); }
+  #send {
+    padding: 10px 16px; font-size: 12px; font-family: inherit;
+    background: rgba(0,212,255,0.15);
+    border: 1px solid rgba(0,212,255,0.5);
+    color: var(--cyan); border-radius: 6px;
+    cursor: pointer; letter-spacing: 0.1em;
+    transition: all 0.2s;
+  }
+  #send:hover:not(:disabled) { background: rgba(0,212,255,0.25); }
+  #send:disabled { opacity: 0.4; cursor: not-allowed; }
+  .gate {
+    position: fixed; inset: 0;
+    background: var(--bg);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 1000;
+    background-image: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
+  }
+  .gate-box {
+    background: rgba(0,212,255,0.03);
+    border: 1px solid rgba(0,212,255,0.3);
+    padding: 24px; border-radius: 8px;
+    max-width: 320px; width: 90%;
+  }
+  .gate h2 { margin: 0 0 6px; font-size: 16px; color: #e8f4ff; letter-spacing: 0.08em; }
+  .gate .sub { margin-bottom: 14px; }
+  .gate input {
+    width: 100%; padding: 10px;
+    background: rgba(0,0,0,0.3); border: 1px solid rgba(0,212,255,0.3);
+    color: var(--text); border-radius: 4px; font-family: inherit;
+    font-size: 13px; outline: none; margin-bottom: 10px;
+  }
+  .gate-error { color: #ff4466; font-size: 11px; margin-top: 6px; min-height: 14px; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-thumb { background: rgba(0,212,255,0.2); border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<div id="gate" class="gate" style="display:none;">
+  <div class="gate-box">
+    <h2>⬡ AEGIS</h2>
+    <div class="sub" style="font-size:10px;color:rgba(0,212,255,0.6);letter-spacing:0.15em;">ACCESS REQUIRED</div>
+    <input id="gate-input" type="password" placeholder="Access code" autocomplete="off" />
+    <button id="gate-submit" style="width:100%;padding:10px;background:rgba(0,212,255,0.15);border:1px solid rgba(0,212,255,0.5);color:var(--cyan);border-radius:4px;font-family:inherit;font-size:12px;letter-spacing:0.1em;cursor:pointer;">ENTER →</button>
+    <div id="gate-error" class="gate-error"></div>
+  </div>
+</div>
+
+<header>
+  <div class="brand">
+    <div class="logo">⬡</div>
+    <div>
+      <h1>AEGIS PORTFOLIO</h1>
+      <div class="sub">ADVISORY INTELLIGENCE</div>
+    </div>
+  </div>
+  <a href="/" class="dash-link">← DASHBOARD</a>
+</header>
+
+<div class="stock-chips" id="chips"></div>
+
+<div id="chat">
+  <div class="empty">
+    <div class="logo-big">⬡</div>
+    <div>AEGIS READY — ASK ANYTHING</div>
+  </div>
+</div>
+
+<div class="prompts" id="prompts"></div>
+
+<div class="input-bar">
+  <textarea id="input" rows="1" placeholder="Ask about your portfolio..."></textarea>
+  <button id="send">SEND →</button>
+</div>
+
+<script>
+const QUICK_PROMPTS = [
+  { label: 'Full Analysis', prompt: 'Give me a full analysis of all my stocks and what I should do right now.' },
+  { label: 'Risks', prompt: 'What macro risks should I worry about?' },
+  { label: 'Rebalance?', prompt: 'Should I rebalance? Any concentration risk?' },
+  { label: 'AI Sector', prompt: 'How is the AI sector performing this week?' },
+];
+
+let STOCKS = [];
+
+const state = {
+  messages: [],
+  loading: false,
+  accessCode: localStorage.getItem('aegis_access_code') || '',
+};
+
+async function loadConfig() {
+  try {
+    const r = await fetch('config.json');
+    const cfg = await r.json();
+    STOCKS = cfg.portfolio;
+  } catch (e) {
+    STOCKS = []; // fallback
+  }
+}
+
+// ─── Access gate ────────────────────────────────────────────────
+// We probe the API once to see if an access code is required.
+async function checkAccess() {
+  try {
+    const r = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Access-Code': state.accessCode },
+      body: JSON.stringify({ messages: [{ role: 'user', content: 'ping' }] }),
+    });
+    if (r.status === 401) {
+      showGate('Invalid access code');
+      return false;
+    }
+    return true;
+  } catch (e) {
+    // Probably running locally without backend; let user through anyway
+    return true;
+  }
+}
+
+function showGate(errMsg) {
+  document.getElementById('gate').style.display = 'flex';
+  if (errMsg) document.getElementById('gate-error').textContent = errMsg;
+}
+
+document.getElementById('gate-submit').addEventListener('click', () => {
+  const v = document.getElementById('gate-input').value.trim();
+  if (!v) return;
+  state.accessCode = v;
+  localStorage.setItem('aegis_access_code', v);
+  document.getElementById('gate').style.display = 'none';
+});
+
+document.getElementById('gate-input').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') document.getElementById('gate-submit').click();
+});
+
+// ─── Rendering ──────────────────────────────────────────────────
+function renderChips() {
+  const el = document.getElementById('chips');
+  el.innerHTML = STOCKS.map(s => `
+    <div class="chip" data-ticker="${s.ticker}">
+      <div class="chip-ticker" style="color:${s.color}">${s.ticker}</div>
+      <div class="chip-name">${s.name}</div>
+    </div>
+  `).join('');
+  el.querySelectorAll('.chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const t = chip.dataset.ticker;
+      const stock = STOCKS.find(s => s.ticker === t);
+      sendMessage(`Quick analysis of ${stock.name} (${t}) — status and recommendation?`);
+    });
+  });
+}
+
+function renderPrompts() {
+  const el = document.getElementById('prompts');
+  // Build combined list: general + per-stock
+  const allPrompts = [
+    ...QUICK_PROMPTS,
+    ...STOCKS.map(s => ({ label: s.ticker, prompt: `Deep dive on ${s.name} (${s.ticker}) — outlook and any concerns?` })),
+  ];
+  el.innerHTML = allPrompts.map((p, i) =>
+    `<button class="prompt-btn" data-i="${i}" ${state.loading ? 'disabled' : ''}>${p.label}</button>`
+  ).join('');
+  el.querySelectorAll('.prompt-btn').forEach(b => {
+    b.addEventListener('click', () => sendMessage(allPrompts[parseInt(b.dataset.i)].prompt));
+  });
+}
+
+function renderChat() {
+  const el = document.getElementById('chat');
+  if (state.messages.length === 0 && !state.loading) {
+    el.innerHTML = `<div class="empty"><div class="logo-big">⬡</div><div>AEGIS READY — ASK ANYTHING</div></div>`;
+    return;
+  }
+  let html = '';
+  state.messages.forEach(m => {
+    if (m.role === 'user') {
+      html += `<div class="msg msg-user"><div class="bubble">${escapeHTML(m.content)}</div></div>`;
+    } else {
+      html += `<div class="msg"><div class="avatar">⬡</div><div class="bubble">${formatAssistant(m.content)}</div></div>`;
+    }
+  });
+  if (state.loading) {
+    html += `<div class="loading-row">
+      <div class="avatar">⬡</div>
+      <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+      <span class="loading-text">SEARCHING & ANALYZING</span>
+    </div>`;
+  }
+  el.innerHTML = html;
+  el.scrollTop = el.scrollHeight;
+}
+
+function escapeHTML(s) {
+  return String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+}
+
+function formatAssistant(s) {
+  // Light markdown: **bold**, bullets, line breaks
+  let out = escapeHTML(s);
+  out = out.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+  out = out.replace(/^- (.+)$/gm, '• $1');
+  return out;
+}
+
+// ─── Send ───────────────────────────────────────────────────────
+async function sendMessage(text) {
+  const inputEl = document.getElementById('input');
+  const userMsg = (text || inputEl.value).trim();
+  if (!userMsg || state.loading) return;
+  inputEl.value = '';
+
+  state.messages.push({ role: 'user', content: userMsg });
+  state.loading = true;
+  renderChat();
+  renderPrompts();
+
+  try {
+    const r = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Access-Code': state.accessCode },
+      body: JSON.stringify({ messages: state.messages }),
+    });
+    if (r.status === 401) {
+      state.messages.pop();
+      state.loading = false;
+      showGate('Invalid access code');
+      renderChat();
+      renderPrompts();
+      return;
+    }
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.error || 'Request failed');
+    state.messages.push({ role: 'assistant', content: data.reply });
+  } catch (e) {
+    state.messages.push({ role: 'assistant', content: '⚠ ' + e.message });
+  } finally {
+    state.loading = false;
+    renderChat();
+    renderPrompts();
+  }
+}
+
+document.getElementById('send').addEventListener('click', () => sendMessage());
+document.getElementById('input').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+});
+
+// ─── Init ───────────────────────────────────────────────────────
+(async () => {
+  await loadConfig();
+  renderChips();
+  renderPrompts();
+  renderChat();
+})();
+</script>
+</body>
+</html>
