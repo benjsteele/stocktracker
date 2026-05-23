@@ -1,42 +1,48 @@
 {
   "date": "2026-05-23",
-  "market_summary": "U.S. equity markets are broadly steady near recent highs, with the Nasdaq up ~0.19% and S&P 500 up ~0.37% on May 22; the AI sector remains the dominant growth driver, though rising crude oil above $100/barrel and a 10-year Treasury yield at 4.6% present modest macro headwinds.",
+  "market_summary": "U.S. markets closed mixed-to-positive on May 22 (S&P 500 +0.37%, Nasdaq +0.19%), with the AI sector digesting NVIDIA's blowout Q1 earnings while broader tech names traded quietly ahead of the weekend. The AI infrastructure spending narrative remains firmly intact, with analysts raising price targets across the board following NVDA's results.",
   "action_required": false,
   "stocks": {
     "MSFT": {
-      "status": "HOLD",
+      "status": "WATCH",
       "price": 418.57,
       "change_pct": -0.37,
       "price_note": "$418.57 (-0.37%)",
-      "headline": "RBC Capital reiterated its Buy rating on MSFT today, while a senior executive (Yusuf Mehdi) is departing after the next fiscal year per an internal memo.",
-      "reasoning": "MSFT's Q3 FY26 results beat the high end of guidance with revenue of $82.9B (+15% YoY) and operating margin of 46.3%, confirming the core business remains healthy. The Anthropic chip-rental talks and EY alliance worth over $1B signal continued enterprise AI monetization momentum. The executive departure and MSFT trading below its 200-day moving average and 52-week high of $555.45 are worth noting, but neither represents a material threat to the long-term thesis — no action warranted."
+      "headline": "Veteran exec Yusuf Mehdi confirmed departing after fiscal year-end, while Anthropic is in talks to rent Microsoft-designed AI server chips — a positive signal for MSFT's custom silicon strategy.",
+      "reasoning": "Microsoft has been flagged as a relative laggard among hyperscalers, with analysts noting it has missed estimates for three consecutive quarters and that its heavy OpenAI dependency has created headwinds. However, the emerging Anthropic chip deal and a fresh $1B+ EY enterprise AI alliance suggest the AI monetization pipeline is broadening. RBC Capital reaffirmed a Buy rating this week; next earnings are July 28, 2026 — a key catalyst to watch for cloud re-acceleration."
     },
     "AMZN": {
-      "price": 268.46,
-      "change_pct": 1.3,
-      "price_note": "$268.46 (+1.30%)",
       "status": "HOLD",
-      "headline": "Amazon stock rallied after winning a legal victory defeating an appeal claiming it aided tariff evasion, reinforcing legal clarity around its marketplace business.",
-      "reasoning": "AWS cloud revenue growth accelerated to +28% in Q1 2026, up from +24% in Q4 2025, reflecting deepening enterprise AI workloads. Q1 FY26 revenue hit $181.5B with earnings of $30.25B, demonstrating strong fundamental execution across e-commerce and cloud. With analyst consensus price target averaging ~$312 and AMZN trading at $268, the long-term risk/reward remains compelling — hold with confidence."
+      "price": 266.89,
+      "change_pct": 0.71,
+      "price_note": "$266.89 (+0.71%)",
+      "headline": "Amazon secured a legal victory defeating a tariff-evasion appeal, while AWS Trainium AI chip demand surged — Wells Fargo maintained Overweight with a $312 price target.",
+      "reasoning": "Amazon's AWS cloud revenue growth accelerated to +28% in Q1 2026, following +24% and +20% in the prior two quarters — a clear re-acceleration trend that underpins the long-term thesis. The Trainium chip demand surge reduces AWS dependency on third-party silicon and improves margins structurally. Jeff Bezos publicly stated AI fears are overblown, reinforcing management's conviction in the AI build-out. No action warranted; hold with confidence."
     },
     "NVDA": {
       "status": "HOLD",
       "price": 215.33,
       "change_pct": -1.9,
       "price_note": "$215.33 (-1.90%)",
-      "headline": "NVDA pulled back ~1.9% post-earnings as markets digested a blowout Q1 report — $81.6B revenue (+85% YoY) and Q2 guidance of $91B (+95% YoY) — but analysts remain broadly bullish with a new Street-high price target issued.",
-      "reasoning": "The post-earnings dip is entirely normal 'sell the news' behavior following a monster quarter that crushed guidance; analysts at DBS reaffirmed Buy today and NVDA received a new Street-high target after results. The stock is still up ~63% over the past 12 months and market cap stands at $5.31T, reflecting dominant AI infrastructure positioning. Long-term holders should ignore short-term volatility — the AI chip demand cycle is intact and NVDA's next earnings date is August 26, 2026."
+      "headline": "NVIDIA reported fiscal Q1 revenue of $81.6B (+85% YoY), beat guidance of $78B, and guided Q2 to $91B (+95% YoY) — a post-earnings 'sell the news' dip followed a historic print.",
+      "reasoning": "The post-earnings pullback of ~1.9% is classic 'sell the news' behavior after a 62%+ run over the past year; the underlying fundamentals are exceptional. Q2 guidance of $91B crushed the $87.2B consensus, and NVIDIA's all-time high was just set on May 14 at $236.54. The CEO did acknowledge the China AI chip market is largely ceded to Huawei — a known headwind — but domestic and global hyperscaler demand more than compensates. Long-term holders should sit tight."
     },
     "GOOGL": {
       "status": "HOLD",
       "price": 386.74,
       "change_pct": -0.23,
       "price_note": "$386.74 (-0.23%)",
-      "headline": "Alphabet avoided a forced Chrome divestiture and is now pushing to overturn the antitrust search monopoly ruling entirely, removing a key regulatory overhang.",
-      "reasoning": "GOOGL reported outstanding Q1 2026 results with revenue up 22% to $110B and Google Cloud surging 63% to $20B, with operating margins expanding 220 basis points. The antitrust situation is evolving favorably — avoiding Chrome breakup is a material positive for the long-term structural thesis. At ~$386 vs. a 52-week high of $408, GOOGL is consolidating near all-time highs; long-term holders are in a strong position ahead of the July 22 earnings date."
+      "headline": "Alphabet avoided a Chrome breakup in the DOJ antitrust case and is now seeking to overturn the broader search monopoly ruling, while Q1 results showed sales +22% and Google Cloud revenue +63% YoY.",
+      "reasoning": "Alphabet's Q1 2026 results were exceptionally strong — $110B in revenue with Google Cloud surging to $20B — and operating margins expanded 220 basis points year over year. The antitrust overhang is easing with the Chrome divestiture off the table, and the stock is up 124% over the past year. At a P/E of ~29x with Cloud growing at 63%, valuation remains reasonable for a long-term compounder; next earnings July 22, 2026."
     }
   },
-  "alerts": [],
-  "long_term_view": "All four portfolio holdings — MSFT, AMZN, NVDA, and GOOGL — are integral to the AI infrastructure and cloud computing buildout, which remains one of the most durable multi-year secular growth themes in the market. No material negative developments emerged today; the portfolio's long-term thesis is fully intact and no action is required.",
-  "generated_at": "2026-05-23T09:03:37.438Z"
+  "alerts": [
+    {
+      "stock": "MSFT",
+      "level": "medium",
+      "message": "Monitor Q4 FY2026 earnings on July 28 closely — third consecutive quarter of missing estimates could pressure the stock; watch for Azure re-acceleration signals and any update on the OpenAI partnership economics."
+    }
+  ],
+  "long_term_view": "All four holdings remain core AI infrastructure beneficiaries with durable competitive moats — NVDA in accelerated compute, AMZN/GOOGL in cloud re-acceleration, and MSFT in enterprise AI adoption. The only near-term concern is MSFT's relative underperformance versus peers, but its resources and diversified AI strategy make a long-term thesis change premature.",
+  "generated_at": "2026-05-23T09:34:00.714Z"
 }
