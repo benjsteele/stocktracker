@@ -242,36 +242,46 @@ async function loadConfig() {
 }
 
 // ─── Access gate ────────────────────────────────────────────────
-// We probe the API once to see if an access code is required.
-async function checkAccess() {
+function showGate(errMsg) {
+  document.getElementById('gate').style.display = 'flex';
+  document.getElementById('gate-error').textContent = errMsg || '';
+}
+
+function hideGate() {
+  document.getElementById('gate').style.display = 'none';
+}
+
+async function verifyCode(code) {
   try {
     const r = await fetch('/api/chat', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-Access-Code': state.accessCode },
-      body: JSON.stringify({ messages: [{ role: 'user', content: 'ping' }] }),
+      headers: { 'Content-Type': 'application/json', 'X-Access-Code': code },
+      body: JSON.stringify({ probe: true }),
     });
-    if (r.status === 401) {
-      showGate('Invalid access code');
-      return false;
-    }
-    return true;
+    return r.status !== 401;
   } catch (e) {
-    // Probably running locally without backend; let user through anyway
-    return true;
+    return true; // offline / local dev — let through
   }
 }
 
-function showGate(errMsg) {
-  document.getElementById('gate').style.display = 'flex';
-  if (errMsg) document.getElementById('gate-error').textContent = errMsg;
-}
-
-document.getElementById('gate-submit').addEventListener('click', () => {
+document.getElementById('gate-submit').addEventListener('click', async () => {
   const v = document.getElementById('gate-input').value.trim();
   if (!v) return;
+  const btn = document.getElementById('gate-submit');
+  btn.disabled = true;
+  btn.textContent = 'CHECKING...';
+  const ok = await verifyCode(v);
+  if (!ok) {
+    document.getElementById('gate-error').textContent = 'Invalid access code';
+    btn.disabled = false;
+    btn.textContent = 'ENTER →';
+    return;
+  }
   state.accessCode = v;
   localStorage.setItem('aegis_access_code', v);
-  document.getElementById('gate').style.display = 'none';
+  hideGate();
+  btn.disabled = false;
+  btn.textContent = 'ENTER →';
 });
 
 document.getElementById('gate-input').addEventListener('keydown', (e) => {
@@ -397,7 +407,7 @@ document.getElementById('input').addEventListener('keydown', (e) => {
   renderChips();
   renderPrompts();
   renderChat();
-  await checkAccess();
+  if (!state.accessCode) showGate();
 })();
 </script>
 </body>

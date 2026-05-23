@@ -1,14 +1,29 @@
-// api/chat.js
-// Vercel serverless function — proxies chat requests to Anthropic API.
-// Keeps the API key server-side (never exposed to the browser).
-
 import fs from 'fs';
 import path from 'path';
+import crypto from 'crypto';
+
+// In-memory rate limiter — 20 requests per minute per IP
+const rateMap = new Map();
+function isRateLimited(ip) {
+  const now = Date.now();
+  const window = 60_000;
+  const limit = 20;
+  const entry = rateMap.get(ip) || { count: 0, resetAt: now + window };
+  if (now > entry.resetAt) { entry.count = 0; entry.resetAt = now + window; }
+  entry.count++;
+  rateMap.set(ip, entry);
+  return entry.count > limit;
+}
+
+function timingSafeEqual(a, b) {
+  if (typeof a !== 'string' || typeof b !== 'string') return false;
+  if (a.length !== b.length) return false;
+  return crypto.timingSafeEqual(Buffer.from(a), Buffer.from(b));
+}
 
 function loadPortfolio() {
   try {
-    const cfgPath = path.join(process.cwd(), 'config.json');
-    const cfg = JSON.parse(fs.readFileSync(cfgPath, 'utf-8'));
+    const cfg = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'config.json'), 'utf-8'));
     return cfg.portfolio || [];
   } catch {
     return [];
@@ -36,23 +51,36 @@ If asked about one stock, focus on that one. If asked generally, cover all holdi
 }
 
 export default async function handler(req, res) {
-  // CORS (optional — same-origin works without this, but doesn't hurt)
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  // Restrict CORS to same origin — this API is not a public service
+  const origin = req.headers.origin;
+  if (origin) res.setHeader('Access-Control-Allow-Origin', origin);
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-Access-Code');
+  res.setHeader('Vary', 'Origin');
   if (req.method === 'OPTIONS') return res.status(200).end();
 
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // Simple access code check (prevents random strangers from running up your bill)
+  // Rate limit by IP
+  const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || 'unknown';
+  if (isRateLimited(ip)) {
+    return res.status(429).json({ error: 'Too many requests' });
+  }
+
+  // Access code check (timing-safe)
   const requiredCode = process.env.ACCESS_CODE;
   if (requiredCode) {
-    const provided = req.headers['x-access-code'];
-    if (provided !== requiredCode) {
+    const provided = String(req.headers['x-access-code'] || '');
+    if (!timingSafeEqual(provided, requiredCode)) {
       return res.status(401).json({ error: 'Invalid access code' });
     }
+  }
+
+  // Lightweight probe — used by the gate to verify the code without calling Claude
+  if (req.body?.probe === true) {
+    return res.status(200).json({ ok: true });
   }
 
   const apiKey = process.env.ANTHROPIC_API_KEY;
@@ -63,6 +91,16 @@ export default async function handler(req, res) {
   const { messages } = req.body || {};
   if (!Array.isArray(messages) || messages.length === 0) {
     return res.status(400).json({ error: 'messages array required' });
+  }
+
+  // Basic payload limits — prevent oversized requests
+  if (messages.length > 40) {
+    return res.status(400).json({ error: 'Too many messages in conversation' });
+  }
+  for (const m of messages) {
+    if (typeof m.content === 'string' && m.content.length > 8000) {
+      return res.status(400).json({ error: 'Message too long' });
+    }
   }
 
   try {
