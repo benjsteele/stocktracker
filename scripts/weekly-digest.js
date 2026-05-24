@@ -7,7 +7,6 @@ import fs from 'fs';
 const API_KEY = process.env.ANTHROPIC_API_KEY;
 const RESEND_KEY = process.env.RESEND_API_KEY;
 if (!API_KEY) { console.error('Missing ANTHROPIC_API_KEY'); process.exit(1); }
-if (!RESEND_KEY) { console.error('Missing RESEND_API_KEY'); process.exit(1); }
 
 const config = JSON.parse(fs.readFileSync('config.json', 'utf-8'));
 const NOTIFY_EMAIL = config.notifyEmail;
@@ -65,7 +64,7 @@ Rules:
       'anthropic-version': '2023-06-01',
     },
     body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
+      model: 'claude-sonnet-4-6',
       max_tokens: 2500,
       system: SYSTEM,
       messages: [{ role: 'user', content: userMsg }],
@@ -156,6 +155,10 @@ function buildDigestHTML(d) {
 }
 
 async function sendDigest(digest) {
+  if (!RESEND_KEY) {
+    console.log('  Email skipped (no RESEND_API_KEY set)');
+    return;
+  }
   const fromAddr = process.env.RESEND_FROM || 'AEGIS <onboarding@resend.dev>';
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
