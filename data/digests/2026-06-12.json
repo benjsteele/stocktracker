@@ -1,0 +1,43 @@
+{
+  "week_ending": "2026-06-12",
+  "headline": "The portfolio endured a bruising week as macro headwinds (geopolitical risk, rate-hike fears, oil spike) collided with AI-capex scrutiny, dragging all four holdings lower with MSFT and NVDA bearing the brunt of selling pressure.",
+  "winners_losers": "AMZN was the clear relative winner, showing resilience throughout the week and closing in positive territory on Friday; MSFT was the week's biggest loser, falling roughly 10% from Monday's open to Friday's close and breaking below key technical levels as sentiment soured on AI spending efficiency concerns.",
+  "stocks": {
+    "MSFT": {
+      "week_change_pct": -9.81,
+      "current_price": 387.71,
+      "key_event": "Microsoft fell ~17% YTD and broke below $400 for the first time in the period, compounded by a GitHub security breach, Azure China layoffs, and growing 'tokenmaxxing' AI efficiency scrutiny.",
+      "weekly_take": "MSFT had the worst week in the portfolio on a price basis, but the fundamental story — 18.3% YoY revenue growth, 30% Intelligent Cloud growth, $82.9B quarterly revenue, a $627B commercial backlog — has not changed. The stock is now trading near multi-year valuation lows on a price-to-cash-flow basis, which historically has been an entry point, not an exit. Long-term holders should watch the July 28 earnings call for any guidance cuts on AI capex ROI; absent that, this is sentiment-driven weakness in a structurally sound franchise."
+    },
+    "AMZN": {
+      "week_change_pct": -5.05,
+      "current_price": 238,
+      "key_event": "Amazon secured a $17.5B Citigroup-led loan facility for AI infrastructure and deepened its AI platform with AWS Graviton5 GA and Claude Fable 5 on Bedrock, even as capex concerns weighed on the stock.",
+      "weekly_take": "AMZN demonstrated the best relative strength in the portfolio this week, falling modestly while peers sold off sharply, and was the only holding in the green on Friday. The $17.5B debt facility and continued AWS infrastructure investment signal management's conviction in long-term cloud ROI — and last quarter's 70% EPS beat confirms the business is executing. The pullback from May's ATH of $278.56 to ~$238 looks like a valuation compression in a fundamentally accelerating business; Prime Day (June 23–26) is the next near-term catalyst."
+    },
+    "NVDA": {
+      "week_change_pct": -5.08,
+      "current_price": 205.36,
+      "key_event": "NVDA declined ~5% over the week, pressured by the broader chip-sector selloff post-Broadcom and geopolitical macro risk, even as Oracle's $70B data center commitment and a 40,000-GPU SharonAI order confirmed unbroken demand.",
+      "weekly_take": "NVDA is now roughly 13% off its May all-time high of $236.54, but this week's move looks like sector-driven sentiment rotation rather than any fundamental deterioration — FY2026 revenue of $215.94B (+65% YoY) and a consensus analyst target near $298 imply ~45% upside from current levels. The pipeline of large GPU orders (SharonAI, Helix Digital Infrastructure, Oracle, OpenAI's Ohio data center) remains robust. The Senate hearing invitation from Sen. Warren on China export controls is worth monitoring, but CEO Jensen Huang declined to testify, and the demand pipeline outside China remains overwhelming."
+    },
+    "GOOGL": {
+      "week_change_pct": -1.58,
+      "current_price": 357.77,
+      "key_event": "Alphabet faced a triple-threat of headline risk: an AI Overviews liability ruling, continued dilution pressure from its $84.75B equity raise, and quiet Google Cloud layoffs — while strategically ordering 3 million Intel-built TPUs and backstopping Anthropic's $35B data center deal.",
+      "weekly_take": "GOOGL is down from its weekly open but the price action masked a complex week of both strategic progress and genuine headline risks. The AI Overviews liability ruling is the item that warrants the closest watch — if it expands into advertiser-facing regulation or class-action territory, it could pressure the core search ads franchise. On the positive side, the Berkshire $10B anchor investment in the equity raise and Apple's Private Cloud Compute collaboration reinforce institutional and strategic confidence. Long-term holders should monitor the legal thread and await the July 21 Q2 earnings for a clean read on Google Cloud growth re-acceleration."
+    }
+  },
+  "alerts_fired": [
+    "GOOGL (medium): $84.75B equity raise dilution — monitor forward EPS impact; Berkshire $10B anchor placement provides reassurance but 2026 FCF will remain compressed.",
+    "NVDA (medium): Sen. Warren invited CEO Jensen Huang to testify before Senate Banking Committee on June 11 regarding China chip sales and export controls; Huang declined — monitor for any new export restriction announcements.",
+    "GOOGL (medium): Business Insider reported quiet Google Cloud division layoffs — monitor scope and whether it signals strategic retreat ahead of Q2 earnings.",
+    "GOOGL (medium): GOOGL declined ~10% from May 13 peak and underperformed on a rising market day June 9 — no action needed but continued weakness flagged.",
+    "MSFT (medium): GitHub security breach (malware injected into open-source projects) — monitor for enterprise customer reaction and further disclosures.",
+    "MSFT (medium): MSFT down ~17% YTD, trading near 4-month range lows; Azure China layoffs add headline noise — next fundamental checkpoint is July 28 earnings.",
+    "GOOGL (medium): Court found Google liable for false claims in AI Overviews — monitor for escalation into advertiser-facing regulation or class action.",
+    "MSFT (medium): AI 'tokenmaxxing' pushback and Xbox restructuring create short-term noise — watch for guidance cuts at July 28 earnings call."
+  ],
+  "long_term_check": "All four holdings remain structurally intact as the dominant AI infrastructure and platform layer of the economy — the week's selloff was driven by macro headwinds (geopolitical risk, rate-hike fears, AI capex scrutiny) rather than any fundamental deterioration in earnings, competitive position, or demand outlook. The AI capex supercycle thesis is actually being reinforced this week by Oracle's $70B commitment, Amazon's $17.5B loan facility, and the parade of large GPU orders flowing to NVDA. The primary genuine risk to monitor is GOOGL's AI Overviews legal situation and MSFT's ability to demonstrate AI ROI at the July 28 earnings call.",
+  "next_week_watch": "The Federal Reserve meeting is the dominant macro event — any hawkish surprise on rate trajectory could extend the tech selloff, particularly for high-multiple AI names. Additionally, watch Amazon Prime Day (June 23–26 confirmed) as the first near-term revenue catalyst of the summer, and monitor GOOGL's AI Overviews legal situation for any escalation or advertiser response."
+}
